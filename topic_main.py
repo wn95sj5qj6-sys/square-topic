@@ -14,7 +14,7 @@ from itertools import groupby
 # ========================
 HISTORY_FILE = "data/memory.json"
 OUTPUT_FILE = "data/topics.json"
-MAX_PER_SYMBOL_24H = 3
+MAX_PER_SYMBOL_24H = 5
 COOLDOWN_MINUTES = 30
 SOFT_COOLDOWN_MINUTES = 120
 
@@ -64,10 +64,10 @@ FUNDING_SHORT_STATES = {FUNDING_EXTREME_SHORT, FUNDING_SHORT_BIAS}
 # ========================
 # 安全风控配置
 # ========================
-MAX_WORKERS = 3
+MAX_WORKERS = 2
 PER_SYMBOL_WORKERS = 2
-REQUEST_DELAY_MIN = 0.2
-REQUEST_DELAY_MAX = 0.4
+REQUEST_DELAY_MIN = 0.3
+REQUEST_DELAY_MAX = 0.5
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
