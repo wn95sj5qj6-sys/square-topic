@@ -1,28 +1,12 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-import random
+from main_topic import run_topic
 
 app = FastAPI()
 
-# 页面
 @app.get("/", response_class=HTMLResponse)
 def home():
-    return """（你原来的HTML，不用改）"""
-
-# 🔥 必须加：后端执行逻辑接口
-@app.get("/run")
-def run():
-    # 👉 这里先用简单版本测试
-    samples = [
-        "BTC短线有反弹迹象，关注突破情况",
-        "ETH资金回流，结构偏强",
-        "山寨币分化明显，谨慎追高",
-        "市场震荡，建议控制仓位",
-    ]
-    
-    return {
-        "text": random.choice(samples)
-    }
+    return """
 <!DOCTYPE html>
 <html>
 <head>
@@ -65,16 +49,16 @@ button {
 
 <h2>📈 行情分析</h2>
 
-<button id="runBtn" onclick="run()">生成分析</button>
-<button id="copyBtn" onclick="copyText()">一键复制</button>
+<button onclick="run()">生成分析</button>
+<button onclick="copyText()">一键复制</button>
 
 <div id="status">等待操作</div>
-<div id="result">点击“生成分析”</div>
+<div id="result">点击生成</div>
 
 <script>
 let lastText = "";
 
-// 调用后端
+// 调后端
 async function run() {
   const result = document.getElementById("result");
   const status = document.getElementById("status");
@@ -86,8 +70,9 @@ async function run() {
     const res = await fetch('/run');
     const data = await res.json();
 
-    lastText = data.text || JSON.stringify(data, null, 2);
+    lastText = data.text || JSON.stringify(data);
     result.innerText = lastText;
+
     status.innerText = "✅ 生成完成";
 
   } catch (e) {
@@ -95,19 +80,18 @@ async function run() {
   }
 }
 
-// 复制功能（兼容 iOS）
+// iOS兼容复制
 function copyText() {
   const status = document.getElementById("status");
 
   if (!lastText) {
-    status.innerText = "⚠️ 没有可复制内容";
+    status.innerText = "⚠️ 没有内容";
     return;
   }
 
-  // 优先使用现代 API
   if (navigator.clipboard) {
     navigator.clipboard.writeText(lastText).then(() => {
-      status.innerText = "📋 已复制到剪贴板";
+      status.innerText = "📋 已复制";
     }).catch(() => {
       fallbackCopy();
     });
@@ -116,7 +100,6 @@ function copyText() {
   }
 }
 
-// 兼容 iOS Safari 的 fallback
 function fallbackCopy() {
   const textarea = document.createElement("textarea");
   textarea.value = lastText;
@@ -125,9 +108,9 @@ function fallbackCopy() {
 
   try {
     document.execCommand("copy");
-    document.getElementById("status").innerText = "📋 已复制（兼容模式）";
+    document.getElementById("status").innerText = "📋 已复制（兼容）";
   } catch (err) {
-    document.getElementById("status").innerText = "❌ 复制失败，请手动长按复制";
+    document.getElementById("status").innerText = "❌ 复制失败";
   }
 
   document.body.removeChild(textarea);
@@ -137,3 +120,12 @@ function fallbackCopy() {
 </body>
 </html>
 """
+
+@app.get("/run")
+def run():
+    try:
+        return run_topic()
+    except Exception as e:
+        return {
+            "text": f"生成失败: {str(e)}"
+        }
