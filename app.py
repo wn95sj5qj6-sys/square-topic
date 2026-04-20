@@ -1,131 +1,15 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from main_topic import run_topic
+from topic_main import run_topic
 
 app = FastAPI()
 
-@app.get("/", response_class=HTMLResponse)
-def home():
-    return """
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>行情生成器</title>
-<style>
-body {
-  font-family: -apple-system;
-  padding: 20px;
-  background: #111;
-  color: #eee;
-}
-button {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  margin-top: 10px;
-  border-radius: 8px;
-  border: none;
-}
-#runBtn { background: #00c853; color: white; }
-#copyBtn { background: #2962ff; color: white; }
-#result {
-  margin-top: 20px;
-  white-space: pre-wrap;
-  line-height: 1.5;
-  background: #1e1e1e;
-  padding: 15px;
-  border-radius: 8px;
-}
-#status {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #aaa;
-}
-</style>
-</head>
-
-<body>
-
-<h2>📈 行情分析</h2>
-
-<button onclick="run()">生成分析</button>
-<button onclick="copyText()">一键复制</button>
-
-<div id="status">等待操作</div>
-<div id="result">点击生成</div>
-
-<script>
-let lastText = "";
-
-// 调后端
-async function run() {
-  const result = document.getElementById("result");
-  const status = document.getElementById("status");
-
-  status.innerText = "⏳ 生成中...";
-  result.innerText = "";
-
-  try {
-    const res = await fetch('/run');
-    const data = await res.json();
-
-    lastText = data.text || JSON.stringify(data);
-    result.innerText = lastText;
-
-    status.innerText = "✅ 生成完成";
-
-  } catch (e) {
-    status.innerText = "❌ 请求失败";
-  }
-}
-
-// iOS兼容复制
-function copyText() {
-  const status = document.getElementById("status");
-
-  if (!lastText) {
-    status.innerText = "⚠️ 没有内容";
-    return;
-  }
-
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(lastText).then(() => {
-      status.innerText = "📋 已复制";
-    }).catch(() => {
-      fallbackCopy();
-    });
-  } else {
-    fallbackCopy();
-  }
-}
-
-function fallbackCopy() {
-  const textarea = document.createElement("textarea");
-  textarea.value = lastText;
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  try {
-    document.execCommand("copy");
-    document.getElementById("status").innerText = "📋 已复制（兼容）";
-  } catch (err) {
-    document.getElementById("status").innerText = "❌ 复制失败";
-  }
-
-  document.body.removeChild(textarea);
-}
-</script>
-
-</body>
-</html>
-"""
+@app.get("/")
+def root():
+    return {"msg": "service running"}
 
 @app.get("/run")
 def run():
-    try:
-        return run_topic()
-    except Exception as e:
-        return {
-            "text": f"生成失败: {str(e)}"
-        }
+    result = run_topic()
+    if not result:
+        return {"error": "no result"}
+    return result
