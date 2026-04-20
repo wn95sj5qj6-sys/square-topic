@@ -1,11 +1,28 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+import random
 
 app = FastAPI()
 
+# 页面
 @app.get("/", response_class=HTMLResponse)
 def home():
-    return """
+    return """（你原来的HTML，不用改）"""
+
+# 🔥 必须加：后端执行逻辑接口
+@app.get("/run")
+def run():
+    # 👉 这里先用简单版本测试
+    samples = [
+        "BTC短线有反弹迹象，关注突破情况",
+        "ETH资金回流，结构偏强",
+        "山寨币分化明显，谨慎追高",
+        "市场震荡，建议控制仓位",
+    ]
+    
+    return {
+        "text": random.choice(samples)
+    }
 <!DOCTYPE html>
 <html>
 <head>
